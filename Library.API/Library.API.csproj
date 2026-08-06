@@ -17,4 +17,9 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\LIbrary.Application\LIbrary.Application.csproj" />
+      <ProjectReference Include="..\Library.Infrastructure\Library.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -25,11 +25,11 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(b => b.ISBN).IsUnique();
         });
 
-        // Seed of data (example books)
+        // Seed of data
         modelBuilder.Entity<Book>().HasData(
             new Book
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 Title = "First title",
                 Author = "First author",
                 ISBN = "1111111111111",
@@ -40,7 +40,7 @@ public class ApplicationDbContext : DbContext
             },
             new Book
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 Title = "Second title",
                 Author = "Second author",
                 ISBN = "2222222222222",

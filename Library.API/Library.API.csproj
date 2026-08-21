@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="9.5.4" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.5.4" />
+        <PackageReference Include="MediatR" Version="14.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.19" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.18"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18">
           <PrivateAssets>all</PrivateAssets>
@@ -24,7 +28,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.18" />
-      <ProjectReference Include="..\LIbrary.Application\LIbrary.Application.csproj" />
+      <ProjectReference Include="..\Library.Application\Library.Application.csproj" />
       <ProjectReference Include="..\Library.Infrastructure\Library.Infrastructure.csproj" />
     </ItemGroup>
 

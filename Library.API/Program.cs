@@ -1,4 +1,5 @@
 using System.Text;
+using Library.Application.Mapping;
 using Library.Application.Rentals.Commands;
 using Library.Domain.Interfaces;
 using Library.Infrastructure.Data;
@@ -16,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(BookProfile).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

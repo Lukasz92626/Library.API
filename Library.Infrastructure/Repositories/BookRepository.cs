@@ -20,7 +20,7 @@ public class BookRepository : IBookRepository
     public async Task<IEnumerable<Book>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _context.Books.ToListAsync(cancellationToken);
 
-    public Task<IQueryable<Book>> GetQueryable() => Task.FromResult(_context.Books.AsQueryable());
+    public IQueryable<Book> GetQueryable() => _context.Books.AsQueryable();
 
     public async Task AddAsync(Book book, CancellationToken cancellationToken = default)
         => await _context.Books.AddAsync(book, cancellationToken);

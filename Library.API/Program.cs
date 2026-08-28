@@ -1,15 +1,22 @@
 using System.Text;
+
 using Library.Application.Mapping;
 using Library.Application.Rentals.Commands;
+using Library.Application.Validators;
+
 using Library.Domain.Interfaces;
+
 using Library.Infrastructure.Data;
 using Library.Infrastructure.Repositories;
 using Library.Infrastructure.Services;
+
 using MediatR;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 using Library.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(BookProfile).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(CreateBookRequestValidator).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

@@ -37,7 +37,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             FullName = request.FullName,
             Points = 0,
             TotalFines = 0,
-            JoinDate = DateTime.UtcNow
+            JoinDate = DateTime.UtcNow,
+            Role = "User"
         };
 
         await _userRepository.AddAsync(user, cancellationToken);

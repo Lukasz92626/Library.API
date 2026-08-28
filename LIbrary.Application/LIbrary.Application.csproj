@@ -15,13 +15,10 @@
       <PackageReference Include="AutoMapper" Version="16.2.0" />
       <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
       <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
-      <PackageReference Include="FluentValidation" Version="9.5.4" />
+      <PackageReference Include="FluentValidation" Version="11.9.0" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
       <PackageReference Include="MediatR" Version="9.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.18" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Books\" />
     </ItemGroup>
 
 </Project>

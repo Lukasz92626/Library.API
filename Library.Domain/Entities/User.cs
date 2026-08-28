@@ -11,4 +11,5 @@ public class User
     public DateTime JoinDate { get; set; }
     public List<Rental> Rentals { get; set; } = new();
     public List<UserActivityLog> ActivityLogs { get; set; } = new();
+    public string Role { get; set; } = "User";
 }

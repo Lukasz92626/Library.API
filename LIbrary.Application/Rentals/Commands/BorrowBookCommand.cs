@@ -1,56 +1,96 @@
 ﻿using MediatR;
+using Library.Application.DTOs.Rentals;
 using Library.Domain.Entities;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
 
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+
 namespace Library.Application.Rentals.Commands;
 
-public record BorrowBookCommand(Guid UserId, Guid BookId) : IRequest<Guid>;
+public record BorrowBookCommand(Guid UserId, Guid BookId) : IRequest<RentalResponse>;
 
-public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, Guid>
+public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, RentalResponse>
 {
     private readonly IBookRepository _bookRepository;
     private readonly IRentalRepository _rentalRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ILogger<BorrowBookCommandHandler> _logger;
+    
+    private const int MaxRentals = 5;
+    private const int RentalDays = 30;
     
     public BorrowBookCommandHandler(
         IBookRepository bookRepository,
         IRentalRepository rentalRepository,
-        IUnitOfWork unitOfWork)
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        ILogger<BorrowBookCommandHandler> logger)
     {
         _bookRepository = bookRepository;
         _rentalRepository = rentalRepository;
+        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _logger = logger;
     }
-
-    public async Task<Guid> Handle(BorrowBookCommand request, CancellationToken cancellationToken)
+    
+    public async Task<RentalResponse> Handle(BorrowBookCommand request, CancellationToken cancellationToken)
     {
-        // Checks the availability of the book
-        var book = await _bookRepository.GetByIdAsync(request.BookId, cancellationToken);
-        if (book == null) throw new BookNotFoundException(request.BookId);
-        if (book.AvailableCopies <= 0) throw new BookUnavailableException(request.BookId);
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        // Checks the loan limit
-        var userRentals = await _rentalRepository.GetActiveRentalsByUserIdAsync(request.UserId, cancellationToken);
-        if (userRentals.Count() >= 5) throw new RentalLimitExceededException(5);
-
-        // Creates a new rental
-        var rental = new Rental
+        try
         {
-            Id = Guid.NewGuid(),
-            UserId = request.UserId,
-            BookId = request.BookId,
-            RentalDate = DateTime.UtcNow,
-            DueDate = DateTime.UtcNow.AddDays(30),
-            Status = RentalStatus.Active
-        };
-        
-        book.AvailableCopies--;
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+                throw new UserNotFoundException(request.UserId);
+            
+            var book = await _bookRepository.GetByIdAsync(request.BookId, cancellationToken);
+            if (book == null)
+                throw new BookNotFoundException(request.BookId);
 
-        // Saves changes to the transaction
-        await _rentalRepository.AddAsync(rental, cancellationToken);
-        await _bookRepository.UpdateAsync(book, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return rental.Id;
+            if (book.AvailableCopies <= 0)
+                throw new BookUnavailableException(request.BookId);
+            
+            var activeRentals = await _rentalRepository.GetActiveRentalsByUserIdAsync(request.UserId, cancellationToken);
+            var activeRentalsList = activeRentals.ToList();
+            
+            if (activeRentalsList.Count >= MaxRentals)
+                throw new RentalLimitExceededException(MaxRentals);
+            
+            var rental = new Rental
+            {
+                Id = Guid.NewGuid(),
+                UserId = request.UserId,
+                BookId = request.BookId,
+                RentalDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(RentalDays),
+                Status = RentalStatus.Active
+            };
+            
+            book.AvailableCopies--;
+            
+            await _rentalRepository.AddAsync(rental, cancellationToken);
+            await _bookRepository.UpdateAsync(book, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            
+            _logger.LogInformation("User {UserId} borrowed book {BookId} (Rental: {RentalId})", 
+                request.UserId, request.BookId, rental.Id);
+            
+            var response = _mapper.Map<RentalResponse>(rental);
+            response.BookTitle = book.Title;
+
+            return response;
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

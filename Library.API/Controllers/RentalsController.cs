@@ -29,4 +29,15 @@ public class RentalsController : ControllerBase
         
         return Ok(result);
     }
+    
+    [HttpPost("return/{rentalId}")]
+    public async Task<ActionResult<ReturnBookResponse>> ReturnBook(Guid rentalId)
+    {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
+        
+        var command = new ReturnBookCommand(userId, rentalId);
+        var result = await _mediator.Send(command);
+        
+        return Ok(result);
+    }
 }

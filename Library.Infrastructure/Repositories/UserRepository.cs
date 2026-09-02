@@ -36,4 +36,13 @@ public class UserRepository : IUserRepository
             .ThenBy(u => u.TotalFines)
             .Take(count)
             .ToListAsync(cancellationToken);
+    
+    public IQueryable<User> GetQueryable()
+        => _context.Users.AsNoTracking().AsQueryable();
+
+    public IQueryable<User> GetQueryableWithRentals()
+        => _context.Users
+            .AsNoTracking()
+            .Include(u => u.Rentals)
+            .AsQueryable();
 }

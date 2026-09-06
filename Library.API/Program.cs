@@ -28,6 +28,7 @@ builder.Services.AddAutoMapper(typeof(BookProfile).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(CreateBookRequestValidator).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddSwaggerGen(c =>
 {

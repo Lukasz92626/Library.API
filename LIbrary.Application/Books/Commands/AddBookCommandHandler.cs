@@ -22,7 +22,7 @@ public class AddBookCommandHandler : IRequestHandler<AddBookCommand, BookDetails
 
     public async Task<BookDetailsDto> Handle(AddBookCommand request, CancellationToken cancellationToken)
     {
-        // Sprawdź czy ISBN już istnieje
+        // Check if the ISBN already exists.
         if (await _bookRepository.IsbnExistsAsync(request.ISBN, cancellationToken))
             throw new InvalidOperationDomainException($"Book with ISBN '{request.ISBN}' already exists.");
 

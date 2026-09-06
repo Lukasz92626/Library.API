@@ -1,8 +1,10 @@
 ﻿using Library.Application.DTOs.Gamification;
 using Library.Application.Gamification.Queries;
+using Library.Application.Gamification.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Library.API.Controllers;
 
@@ -30,6 +32,17 @@ public class GamificationController : ControllerBase
         };
 
         var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+    
+    [HttpPost("claim-bonus")]
+    public async Task<ActionResult<DailyBonusResponse>> ClaimDailyBonus()
+    {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
+        
+        var command = new ClaimDailyBonusCommand(userId);
+        var result = await _mediator.Send(command);
+        
         return Ok(result);
     }
 }

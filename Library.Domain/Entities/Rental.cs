@@ -9,6 +9,7 @@ public class Rental
     public DateTime DueDate { get; set; }
     public DateTime? ReturnDate { get; set; }
     public RentalStatus Status { get; set; }
+    public int RenewalCount { get; set; } = 0;
     public User User { get; set; } = null!;
     public Book Book { get; set; } = null!;
 }

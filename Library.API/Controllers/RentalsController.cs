@@ -40,4 +40,14 @@ public class RentalsController : ControllerBase
         
         return Ok(result);
     }
+    
+    [HttpPut("renew/{rentalId}")]
+    public async Task<ActionResult<RenewRentalResponse>> RenewRental(Guid rentalId)
+    {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UnauthorizedAccessException());
+        var command = new RenewRentalCommand(userId, rentalId);
+        var result = await _mediator.Send(command);
+        
+        return Ok(result);
+    }
 }

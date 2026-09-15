@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Library.Application.DTOs.Rentals;
+using Library.Application.Interfaces;
 using Library.Domain.Entities;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
@@ -17,6 +18,7 @@ public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, Renta
     private readonly IRentalRepository _rentalRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IActivityLogger _activityLogger;
     private readonly IMapper _mapper;
     private readonly ILogger<BorrowBookCommandHandler> _logger;
     
@@ -28,6 +30,7 @@ public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, Renta
         IRentalRepository rentalRepository,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
+        IActivityLogger activityLogger,
         IMapper mapper,
         ILogger<BorrowBookCommandHandler> logger)
     {
@@ -35,6 +38,7 @@ public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, Renta
         _rentalRepository = rentalRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
+        _activityLogger = activityLogger;
         _mapper = mapper;
         _logger = logger;
     }
@@ -79,7 +83,15 @@ public class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand, Renta
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
             
-            _logger.LogInformation("User {UserId} borrowed book {BookId} (Rental: {RentalId})", 
+            await _activityLogger.LogAsync(request.UserId, "Borrowed", new
+            {
+                RentalId = rental.Id,
+                BookId = book.Id,
+                BookTitle = book.Title,
+                DueDate = rental.DueDate
+            }, cancellationToken);
+            
+            _logger.LogInformation("User {UserId} borrowed book {BookId} (Rental id: {RentalId})", 
                 request.UserId, request.BookId, rental.Id);
             
             var response = _mapper.Map<RentalResponse>(rental);

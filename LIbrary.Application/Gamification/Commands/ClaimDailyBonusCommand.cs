@@ -1,6 +1,8 @@
 ﻿using Library.Application.DTOs.Gamification;
+using Library.Application.Interfaces;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
+
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ public class ClaimDailyBonusCommandHandler : IRequestHandler<ClaimDailyBonusComm
     private readonly IRentalRepository _rentalRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMemoryCache _cache;
+    private readonly IActivityLogger _activityLogger;
     private readonly ILogger<ClaimDailyBonusCommandHandler> _logger;
 
     private const string CacheKeyPrefix = "DailyBonus_";
@@ -25,12 +28,14 @@ public class ClaimDailyBonusCommandHandler : IRequestHandler<ClaimDailyBonusComm
         IRentalRepository rentalRepository,
         IUnitOfWork unitOfWork,
         IMemoryCache cache,
+        IActivityLogger activityLogger,
         ILogger<ClaimDailyBonusCommandHandler> logger)
     {
         _userRepository = userRepository;
         _rentalRepository = rentalRepository;
         _unitOfWork = unitOfWork;
         _cache = cache;
+        _activityLogger = activityLogger;
         _logger = logger;
     }
 
@@ -70,6 +75,12 @@ public class ClaimDailyBonusCommandHandler : IRequestHandler<ClaimDailyBonusComm
         }
         
         user.Points += BonusPoints;
+        
+        await _activityLogger.LogAsync(request.UserId, "EarnedPoints", new
+        {
+            Points = BonusPoints,
+            Reason = "Daily bonus"
+        }, cancellationToken);
 
         // Saving changes
         await _userRepository.UpdateAsync(user, cancellationToken);

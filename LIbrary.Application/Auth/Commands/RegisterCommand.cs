@@ -14,12 +14,18 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
     private readonly IUserRepository _userRepository;
     private readonly IJwtService _jwtService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IActivityLogger _activityLogger;
 
-    public RegisterCommandHandler(IUserRepository userRepository, IJwtService jwtService, IUnitOfWork unitOfWork)
+    public RegisterCommandHandler(
+        IUserRepository userRepository,
+        IJwtService jwtService,
+        IUnitOfWork unitOfWork,
+        IActivityLogger activityLogger)
     {
         _userRepository = userRepository;
         _jwtService = jwtService;
         _unitOfWork = unitOfWork;
+        _activityLogger = activityLogger;
     }
 
     public async Task<AuthResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -43,6 +49,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        await _activityLogger.LogAsync(user.Id, "Registered", new
+        {
+            Email = user.Email,
+            FullName = user.FullName
+        }, cancellationToken);
 
         // generate JWT token
         var token = _jwtService.GenerateToken(user);

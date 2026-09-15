@@ -1,7 +1,9 @@
 ﻿using Library.Application.DTOs.Rentals;
+using Library.Application.Interfaces;
 using Library.Domain.Entities;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
+
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +18,7 @@ public class ReturnBookCommandHandler : IRequestHandler<ReturnBookCommand, Retur
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFineCalculator _fineCalculator;
+    private readonly IActivityLogger _activityLogger;
     private readonly ILogger<ReturnBookCommandHandler> _logger;
 
     public ReturnBookCommandHandler(
@@ -24,6 +27,7 @@ public class ReturnBookCommandHandler : IRequestHandler<ReturnBookCommand, Retur
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IFineCalculator fineCalculator,
+        IActivityLogger activityLogger,
         ILogger<ReturnBookCommandHandler> logger)
     {
         _rentalRepository = rentalRepository;
@@ -31,6 +35,7 @@ public class ReturnBookCommandHandler : IRequestHandler<ReturnBookCommand, Retur
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _fineCalculator = fineCalculator;
+        _activityLogger = activityLogger;
         _logger = logger;
     }
 
@@ -90,6 +95,24 @@ public class ReturnBookCommandHandler : IRequestHandler<ReturnBookCommand, Retur
 
             // Confirm transaction
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            
+            await _activityLogger.LogAsync(request.UserId, "Returned", new
+            {
+                RentalId = rental.Id,
+                BookId = book.Id,
+                BookTitle = book.Title,
+                Fine = fine,
+                PointsEarned = points
+            }, cancellationToken);
+
+            if (points > 0)
+            {
+                await _activityLogger.LogAsync(request.UserId, "EarnedPoints", new
+                {
+                    Points = points,
+                    Reason = "Book returned"
+                }, cancellationToken);
+            }
             
             _logger.LogInformation(
                 "User {UserId} returned book {BookId} (Rental: {RentalId}). Fine: {Fine}, Points: {Points}",

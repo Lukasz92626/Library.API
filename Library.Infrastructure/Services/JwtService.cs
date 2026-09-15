@@ -1,16 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Library.Application.Interfaces;
 using Library.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Library.Infrastructure.Services;
-
-public interface IJwtService
-{
-    string GenerateToken(User user);
-}
 
 public class JwtService : IJwtService
 {

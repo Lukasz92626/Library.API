@@ -1,9 +1,12 @@
 ﻿using FluentAssertions;
-using Library.Application.DTOs.Rentals;
+
+using Library.Application.Interfaces;
 using Library.Application.Rentals.Commands;
+
 using Library.Domain.Entities;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -18,6 +21,7 @@ public class BorrowBookCommandHandlerTests
     private readonly Mock<IRentalRepository> _rentalRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IActivityLogger> _activityLoggerMock;
     private readonly IMapper _mapper;
     private readonly Mock<ILogger<BorrowBookCommandHandler>> _loggerMock;
     private readonly BorrowBookCommandHandler _handler;
@@ -28,6 +32,7 @@ public class BorrowBookCommandHandlerTests
         _rentalRepositoryMock = new Mock<IRentalRepository>();
         _userRepositoryMock = new Mock<IUserRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _activityLoggerMock = new Mock<IActivityLogger>();
         _loggerMock = new Mock<ILogger<BorrowBookCommandHandler>>();
 
         var mapperConfig = new MapperConfiguration(cfg =>
@@ -41,6 +46,7 @@ public class BorrowBookCommandHandlerTests
             _rentalRepositoryMock.Object,
             _userRepositoryMock.Object,
             _unitOfWorkMock.Object,
+            _activityLoggerMock.Object,
             _mapper,
             _loggerMock.Object);
     }

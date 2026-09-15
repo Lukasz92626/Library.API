@@ -1,8 +1,12 @@
 ﻿using FluentAssertions;
+
+using Library.Application.Interfaces;
 using Library.Application.Rentals.Commands;
+
 using Library.Domain.Entities;
 using Library.Domain.Exceptions;
 using Library.Domain.Interfaces;
+
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -15,6 +19,7 @@ public class ReturnBookCommandHandlerTests
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IFineCalculator> _fineCalculatorMock;
+    private readonly Mock<IActivityLogger> _activityLoggerMock;
     private readonly Mock<ILogger<ReturnBookCommandHandler>> _loggerMock;
     private readonly ReturnBookCommandHandler _handler;
 
@@ -25,6 +30,7 @@ public class ReturnBookCommandHandlerTests
         _userRepositoryMock = new Mock<IUserRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _fineCalculatorMock = new Mock<IFineCalculator>();
+        _activityLoggerMock = new Mock<IActivityLogger>();
         _loggerMock = new Mock<ILogger<ReturnBookCommandHandler>>();
 
         _handler = new ReturnBookCommandHandler(
@@ -33,6 +39,7 @@ public class ReturnBookCommandHandlerTests
             _userRepositoryMock.Object,
             _unitOfWorkMock.Object,
             _fineCalculatorMock.Object,
+            _activityLoggerMock.Object,
             _loggerMock.Object);
     }
 

@@ -14,6 +14,9 @@
                   <Item>
                     <option name="path" value="Library.API/appsettings.json" />
                   </Item>
+                  <Item>
+                    <option name="path" value="Library.API/appsettings.Development.json" />
+                  </Item>
                 </list>
               </option>
             </SchemaInfo>

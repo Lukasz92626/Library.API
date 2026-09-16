@@ -1,0 +1,55 @@
+﻿version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: library-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: library_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - library-network
+
+  # Library API
+  api:
+    build:
+      context: .
+      dockerfile: Library.API/Dockerfile
+    container_name: library-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Database=library_db;Username=postgres;Password=postgres
+      - Jwt__Key=your-super-secret-key-with-at-least-32-characters-long
+      - Jwt__Issuer=LibraryAPI
+      - Jwt__Audience=LibraryClient
+      - Jwt__ExpiryMinutes=60
+    ports:
+      - "5055:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - library-network
+    restart: on-failure
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  library-network:
+    driver: bridge

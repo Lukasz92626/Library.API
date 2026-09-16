@@ -72,8 +72,13 @@ try
     });
 
     // Database
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+    }
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(connectionString));
 
     // Repositories
     builder.Services.AddScoped<IBookRepository, BookRepository>();

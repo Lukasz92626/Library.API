@@ -5,7 +5,20 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg)](https://www.docker.com/)
 
-REST API for library management.
+REST API for library management. Library.API is a RESTful web service for managing library resources. It follows a clean architecture approach, separating concerns across Application, Domain, Infrastructure, and API layers.
+
+## Project Structure
+
+    Library.API/
+    ├── .config/                  # Configuration files
+    ├── Library.API/              # API layer (controllers, middleware, DI)
+    ├── LIbrary.Application/      # Application layer (use cases, business logic)
+    ├── Library.Domain/           # Domain layer (entities, core models)
+    ├── Library.Infrastructure/   # Infrastructure layer (EF Core, DB context, migrations)
+    ├── Library.Tests/            # Unit and integration tests
+    ├── docker-compose.yaml       # Docker Compose configuration
+    ├── Library.sln               # Solution file
+    └── README.md
 
 ## Quick start with Docker
 
@@ -31,6 +44,8 @@ docker-compose down
 
 ## Endpoints
 
-- **API:** http://localhost:5055
-- **Swagger:** http://localhost:5055/swagger
-- **PostgreSQL:** localhost:5432
+| Service    | URL                              |
+|------------|----------------------------------|
+| API        | http://localhost:5055            |
+| Swagger UI | http://localhost:5055/swagger    |
+| PostgreSQL | localhost:5432                   |
